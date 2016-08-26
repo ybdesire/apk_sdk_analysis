@@ -43,8 +43,6 @@ class apkparser:
             pkg_dict[pkg_without_classinfo].append(c)
         
         self.pkg_class_dict = pkg_dict
-        print('len pkgs_class: {}'.format(len(pkgs_class)))
-        print('len pkgs: {}'.format(len(pkgs)))
         return self.pkg_class_dict
 
 
@@ -68,17 +66,54 @@ class apkparser:
     
     # class level info
     # get all class size sum 
-    def get_class_size_sum(class_item_list):
+    def get_class_size_sum(self, class_item_list):
         size_sum = 0
         for class_item in class_item_list:
             size_sum += class_item.get_length()
         return size_sum
 
 
+    # get class_item_list by package name 
+    def get_class_item_list(self, pkg_name):
+        if not self.pkg_class_dict: # dict is empty
+            self.get_pkg_class_dict()
+        if pkg_name in self.pkg_class_dict:
+            return self.pkg_class_dict[pkg_name]
+        else:
+            return null
+    
+    # class level info
+    def get_class_interface_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum = len( class_item.get_interfaces() )
+        return count_sum
 
 
+    # class level info
+    def get_class_methods_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum = class_item.get_class_data().get_direct_methods_size()
+        return count_sum
+
+    # class level info
+    def get_class_virtual_method_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum = class_item.get_class_data().get_virtual_methods_size()
+        return count_sum
 
 
+    # class level info
+    def get_class_variable_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum = len( class_item.get_fields() )
+        return count_sum
+
+
+  
 if __name__ == '__main__':
     pass
 

@@ -1,39 +1,42 @@
-import os
-import sys
-
-androguard_module_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), 'common/Androguard-2.0/androguard' )
-
-if not androguard_module_path in sys.path:
-    sys.path.append(androguard_module_path)
+import unittest
+from apkparser import apkparser
 
 
-from androguard.core.bytecodes import apk
-from androguard.core.bytecodes import dvm
-from androguard.core.analysis import analysis
+class test_apkparser(unittest.TestCase):
 
-
-
-sp = '../samples_balanced/00000b633c4c584045874073da8a142c8c79a2bf'
-
-def get_androguard_obj(apkfile):
-    a = apk.APK(apkfile, False, "r", None, 2)
-    d = dvm.DalvikVMFormat(a.get_dex())
-    x = analysis.VMAnalysis(d)
-    return (a,d,x)
-
-
-if __name__=='__main__':
-    ao = get_androguard_obj(sp)
-    x = ao[2]
-    pkgs = x.get_tainted_packages()
-    for pkg in pkgs.get_packages():
-        print(pkg)
+    # init self variable
+    # write init like this to ignore duplicate with unittest init. http://stackoverflow.com/questions/17353213/init-for-unittest-testcase
+    def __init__(self, *args, **kwargs):
+        super(test_apkparser, self).__init__(*args, **kwargs)
+        self.ap = apkparser('test.apk')
     
+    # test apkparser.get_pkg_class_dict()
+    def test_get_pkg_class_dict(self):
+       pkg_class_dict = self.ap.get_pkg_class_dict()
+       pkg_count = len(pkg_class_dict) 
+       class_count = 0
+       for k in pkg_class_dict:
+           c = pkg_class_dict[k]
+           class_count += len(c)
+
+       self.assertEqual(pkg_count, 109)
+       self.assertEqual(class_count, 1680)
+
+    def test_get_class_count(self):
+        c = self.ap.get_class_count('Lcom/alipay/sdk/util')
+        self.assertEqual(c, 12)
+        
+        c = self.ap.get_class_count('not/a/pkg')
+        self.assertEqual(c, -1)
+        
+    def test_get_pkg_depth(self):
+        self.assertEqual(self.ap.get_pkg_depth('Lcom/alipay/sdk/util'), 4)
+        self.assertEqual(self.ap.get_pkg_depth('Lcom/alipay/sdk'), 3)
+
+    def test_get_class_size_sum(self):
+        class_item_list = self.ap.get_class_item_list('Lcom/alipay/sdk/util')
+        self.assertEqual( self.ap.get_class_size_sum(class_item_list), 384 )
 
 
-
-
-
-
-
-
+if __name__ == '__main__':
+    unittest.main()
