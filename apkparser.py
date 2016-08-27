@@ -73,6 +73,7 @@ class apkparser:
         return size_sum
 
 
+    # internal use
     # get class_item_list by package name 
     def get_class_item_list(self, pkg_name):
         if not self.pkg_class_dict: # dict is empty
@@ -82,11 +83,12 @@ class apkparser:
         else:
             return null
     
+
     # class level info
     def get_class_interface_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum = len( class_item.get_interfaces() )
+            count_sum += len( class_item.get_interfaces() )
         return count_sum
 
 
@@ -94,14 +96,14 @@ class apkparser:
     def get_class_methods_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum = class_item.get_class_data().get_direct_methods_size()
+            count_sum += class_item.get_class_data().get_direct_methods_size()
         return count_sum
 
     # class level info
     def get_class_virtual_method_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum = class_item.get_class_data().get_virtual_methods_size()
+            count_sum += class_item.get_class_data().get_virtual_methods_size()
         return count_sum
 
 
@@ -109,11 +111,39 @@ class apkparser:
     def get_class_variable_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum = len( class_item.get_fields() )
+            count_sum += len( class_item.get_fields() )
+        return count_sum
+
+
+    # class level info
+    def get_class_instance_variable_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum += class_item.get_class_data().get_instance_fields_size()
+        return count_sum
+
+        
+    # class level info
+    def get_class_static_variable_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum += class_item.get_class_data().get_static_fields_size()
+        return count_sum
+
+
+    # class level info
+    def get_class_access_flag_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            count_sum += class_item.get_class_data().get_access_flag()
         return count_sum
 
 
   
 if __name__ == '__main__':
     pass
+
+
+
+
 

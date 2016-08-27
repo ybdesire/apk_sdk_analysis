@@ -9,6 +9,7 @@ class test_apkparser(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(test_apkparser, self).__init__(*args, **kwargs)
         self.ap = apkparser('test.apk')
+        self.class_item_list = self.ap.get_class_item_list('Lcom/alipay/sdk/util')
     
     # test apkparser.get_pkg_class_dict()
     def test_get_pkg_class_dict(self):
@@ -34,8 +35,21 @@ class test_apkparser(unittest.TestCase):
         self.assertEqual(self.ap.get_pkg_depth('Lcom/alipay/sdk'), 3)
 
     def test_get_class_size_sum(self):
-        class_item_list = self.ap.get_class_item_list('Lcom/alipay/sdk/util')
-        self.assertEqual( self.ap.get_class_size_sum(class_item_list), 384 )
+        self.assertEqual( self.ap.get_class_size_sum(self.class_item_list), 384 )
+
+    def test_get_class_interface_count_sum(self):
+        self.assertEqual( self.ap.get_class_interface_count_sum(self.class_item_list), 2 )
+        
+    def test_get_class_methods_count_sum(self):
+        self.assertEqual( self.ap.get_class_methods_count_sum(self.class_item_list), 64 )
+
+    def test_get_class_virtual_method_count_sum(self):
+        self.assertEqual( self.ap.get_class_virtual_method_count_sum(self.class_item_list), 12 )
+
+    def test_get_class_variable_count_sum(self):
+        self.assertEqual( self.ap.get_class_variable_count_sum(self.class_item_list), 46 )
+
+
 
 
 if __name__ == '__main__':
