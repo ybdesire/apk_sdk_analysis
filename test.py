@@ -1,6 +1,6 @@
 import unittest
 from apkparser import apkparser
-
+import numpy as np
 
 class test_apkparser(unittest.TestCase):
 
@@ -49,6 +49,18 @@ class test_apkparser(unittest.TestCase):
     def test_get_class_variable_count_sum(self):
         self.assertEqual( self.ap.get_class_variable_count_sum(self.class_item_list), 46 )
 
+    def test_get_class_instance_variable_count_sum(self):
+        self.assertEqual( self.ap.get_class_instance_variable_count_sum(self.class_item_list), 20 )
+
+    def test_get_class_static_variable_count_sum(self):
+        self.assertEqual( self.ap.get_class_static_variable_count_sum(self.class_item_list), 26 )
+
+    def test_get_class_access_flag_count_sum(self):
+        self.assertEqual( self.ap.get_class_access_flag_count_sum(self.class_item_list), 16569 )
+
+    def test_get_class_name_array(self):
+        class_name_arr = self.ap.get_class_name_array(self.class_item_list)
+        self.assertEqual( class_name_arr, np.array([2.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0]) )
 
 
 

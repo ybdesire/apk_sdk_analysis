@@ -10,7 +10,7 @@ if not androguard_module_path in sys.path:
 from androguard.core.bytecodes import apk
 from androguard.core.bytecodes import dvm
 from androguard.core.analysis import analysis
-
+from sklearn.feature_extraction import FeatureHasher
 
 __author__ = 'Bin Yin (ybdesire@gmail.com)'
 __date__ = '2016-08-26'
@@ -135,9 +135,20 @@ class apkparser:
     def get_class_access_flag_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum += class_item.get_class_data().get_access_flag()
+            count_sum += class_item.get_access_flags()
         return count_sum
 
+
+    # class level info
+    # return array[1], float type
+    def get_class_name_array(self, class_item_list):
+        D=[{}]
+        for class_item in class_item_list:
+           class_name = class_item.get_name()
+           D[0][class_name] = 1
+        h = FeatureHasher(n_features=10, non_negative=True)
+        f = h.transform(D)
+        return f.toarray()[0]
 
   
 if __name__ == '__main__':
