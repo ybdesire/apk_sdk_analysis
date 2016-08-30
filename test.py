@@ -60,7 +60,9 @@ class test_apkparser(unittest.TestCase):
 
     def test_get_class_name_array(self):
         class_name_arr = self.ap.get_class_name_array(self.class_item_list)
-        self.assertEqual( class_name_arr, np.array([2.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0]) )
+        expected_result = np.array([2.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0])
+        for i in range(10):
+            self.assertEqual( class_name_arr[i], expected_result[i] )
 
 
 
