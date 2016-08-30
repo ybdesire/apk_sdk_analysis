@@ -64,7 +64,36 @@ class test_apkparser(unittest.TestCase):
         for i in range(10):
             self.assertEqual( class_name_arr[i], expected_result[i] )
 
+    def test_get_class_super_class_name_array(self):
+        class_name_arr = self.ap.get_class_super_class_name_array(self.class_item_list)
+        expected_result = np.array( [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] )
+        for i in range(10):
+            self.assertEqual( class_name_arr[i], expected_result[i] )
+
+
+
+
+    def test_get_method_native_function_count_sum(self):
+        self.assertEqual( self.ap.get_method_native_function_count_sum(self.class_item_list), 0 )
+    
+    def test_get_method_para_num_array(self):
+        expected_result = np.array( [34, 32, 8, 0, 2, 0, 0, 0, 0, 0] )
+        rt = self.ap.get_method_para_num_array(self.class_item_list)
+        for i in range(10):
+            self.assertEqual( rt[i], expected_result[i] )
+ 
+    def test_get_method_access_info_array(self):
+        expected_result = np.array( [39, 26, 12, 0, 15, 47, 0, 5, 0, 0, 0, 0] )
+        rt = self.ap.get_method_access_info_array(self.class_item_list)
+        for i in range(10):
+            self.assertEqual( rt[i], expected_result[i] )
+
+
 
 
 if __name__ == '__main__':
     unittest.main()
+
+
+
+

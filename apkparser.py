@@ -140,7 +140,7 @@ class apkparser:
 
 
     # class level info
-    # return array[1], float type
+    # return array[10], float type
     def get_class_name_array(self, class_item_list):
         D=[{}]
         for class_item in class_item_list:
@@ -150,7 +150,100 @@ class apkparser:
         f = h.transform(D)
         return f.toarray()[0]
 
-  
+   
+    # class level info
+    # return array[10], float type
+    def get_class_super_class_name_array(self, class_item_list):
+        D=[{}]
+        for class_item in class_item_list:
+           class_name = class_item.get_superclassname()
+           D[0][class_name] = 1
+        h = FeatureHasher(n_features=10, non_negative=True)
+        f = h.transform(D)
+        return f.toarray()[0]
+    
+
+    # method level info
+    def get_method_native_function_count_sum(self, class_item_list):
+        count_sum = 0
+        for class_item in class_item_list:
+            methods = class_item.get_methods()
+            for m in methods:
+                fun_access_str = m.get_access_flags_string() # such as 'public static'
+                if 'native' in fun_access_str:
+                    count_sum += 1
+        return count_sum
+
+    # method level info
+    # return [34, 32, 8, 0, 2, 0, 0, 0, 0, 0], means they are 34 functions with void parameter, and 32 functions with 1 parameter, and 8 functions with 2 parameters, ...
+    def get_method_para_num_array(self, class_item_list):
+        result = [0]*10
+
+        for class_item in class_item_list:
+            methods = class_item.get_methods()
+            for m in methods:
+                fun_info = m.get_information()
+                if('params' in fun_info):
+                    param_count = len( fun_info['params'] )
+                    if(param_count>=9):
+                        result[9] += 1
+                    else:
+                        result[param_count] += 1
+                else:
+                    result[0] += 1
+        return result
+
+
+    # method level info
+    # 
+    def get_method_access_info_array(self, class_item_list):
+        '''
+        public
+        private
+        final
+        abstract
+        constructor
+        static
+        synchronized
+        synthetic
+        bridge
+        varargs
+        0x0
+        protected
+        '''
+        result = [0]*12
+        for class_item in class_item_list:
+            methods = class_item.get_methods()
+            for m in methods:
+                access_info_list = m.get_access_flags_string().split(' ')
+                for a in access_info_list:
+                    if(a=='public'):
+                        result[0] += 1
+                    elif(a=='private'):
+                        result[1] += 1
+                    elif(a=='final'):
+                        result[2] += 1
+                    elif(a=='abstract'):
+                        result[3] += 1
+                    elif(a=='constructor'):
+                        result[4] += 1
+                    elif(a=='static'):
+                        result[5] += 1
+                    elif(a=='synchronized'):
+                        result[6] += 1
+                    elif(a=='synthetic'):
+                        result[7] += 1
+                    elif(a=='bridge'):
+                        result[8] += 1
+                    elif(a=='varargs'):
+                        result[9] += 1
+                    elif(a=='0x0'):
+                        result[10] += 1
+                    else:
+                        result[11] += 1
+        return result
+
+
 if __name__ == '__main__':
     pass
 
