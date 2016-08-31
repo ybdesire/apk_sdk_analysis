@@ -1,6 +1,7 @@
 import unittest
 from apkparser import apkparser
 import numpy as np
+import pickle
 
 class test_apkparser(unittest.TestCase):
 
@@ -88,7 +89,17 @@ class test_apkparser(unittest.TestCase):
         for i in range(10):
             self.assertEqual( rt[i], expected_result[i] )
 
+    def test_api_list(self):
+        expected_result = [('.TelephonyManager;', 'getSubscriberId'), ('.TelephonyManager;', 'getDeviceId'), ('.TelephonyManager;', 'getNetworkOperator'), ('.TelephonyManager;', 'getNetworkOperatorName'), ('.TelephonyManager;', 'getNetworkType'), ('.WifiInfo;', 'getMacAddress'), ('.NetworkInterface;', 'getNetworkInterfaces'), ('.TelephonyManager;', 'getLine1Number'), ('.TelephonyManager;', 'getVoiceMailNumber'), ('.TelephonyManager;', 'getSimOperator'), ('.TelephonyManager;', 'getSimOperatorName'), ('.TelephonyManager;', 'getSimState'), ('.BroadcastReceiver;', 'abortBroadcast'), ('.TelephonyManager;', 'getSimSerialNumber'), ('.Location;', 'getLongitude'), ('.Location;', 'getLatitude'), ('.Camera;', 'startPreview'), ('.Camera;', 'takePicture'), ('.MediaRecorder;', 'setVideoSource'), ('.MediaRecorder;', 'start'), ('.MediaRecorder;', 'setAudioSource'), ('.AudioRecord;', 'startRecording'), ('.NotificationManager;', 'notify'), ('Ljava/lang/Runtime;', 'exec'), ('Landroid/content/pm/PackageManager;', 'deletePackage'), ('.PathClassLoader;', '<init>'), ('.DexClassLoader;', '<init>'), ('.DexFile;', '<init>'), ('.DexFile;', 'loadDex'), ('.PowerManager;', 'reboot'), ('Ljava/lang/reflect/Method;', 'invoke'), ('.WifiManager;', 'setWifiEnabled'), ('.ServerSocket;', '<init>')]
+        rs = pickle.load( open('api_list.p', 'rb') )
+        for i in range(len(rs)):
+            self.assertEqual( expected_result[i], rs[i])
 
+    def test_get_sensitive_api_info(self):
+        expected_result = [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        rs = self.ap.get_sensitive_api_info(self.class_item_list)
+        for i in range(len(expected_result)):
+            self.assertEqual( expected_result[i], rs[i])
 
 
 if __name__ == '__main__':

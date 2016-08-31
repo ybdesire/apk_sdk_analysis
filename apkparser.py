@@ -1,5 +1,6 @@
 import os
 import sys
+import pickle
 
 androguard_module_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), 'common/Androguard-2.0/androguard' )
 
@@ -241,6 +242,31 @@ class apkparser:
                         result[10] += 1
                     else:
                         result[11] += 1
+        return result
+
+ 
+    
+    def get_sensitive_api_info(self, class_item_list):
+        class_item_names = []
+        for class_item in class_item_list:
+            class_item_names.append( class_item.get_name() )
+
+        api_list = pickle.load( open('api_list.p', 'rb') )
+        result = [0]*len(api_list)
+        count = 0
+        for api in api_list:
+            class_pattern = api[0]
+            method_pattern = api[1]
+            paths = self.x.get_tainted_packages().search_methods(class_pattern, method_pattern, '.') 
+            class_names = []
+            for p in paths:
+                i = p.get_src_idx()
+                m = self.d.get_method_by_idx(i)
+                class_names.append( m.get_class_name() )
+            for c in class_names:
+                if c in class_item_names:
+                    result[count] += 1
+            count += 1
         return result
 
 
