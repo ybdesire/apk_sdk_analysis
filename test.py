@@ -1,5 +1,6 @@
 import unittest
 from apkparser import apkparser
+from feature_extractor import feature_extractor
 import numpy as np
 import pickle
 
@@ -28,12 +29,21 @@ class test_apkparser(unittest.TestCase):
         c = self.ap.get_class_count('Lcom/alipay/sdk/util')
         self.assertEqual(c, 12)
         
-        c = self.ap.get_class_count('not/a/pkg')
-        self.assertEqual(c, -1)
-        
+        try:
+            c = self.ap.get_class_count('not/a/pkg')
+            self.assertEqual(1,-1)
+        except Exception as e:
+            self.assertEqual( 1,1 )
+         
     def test_get_pkg_depth(self):
         self.assertEqual(self.ap.get_pkg_depth('Lcom/alipay/sdk/util'), 4)
         self.assertEqual(self.ap.get_pkg_depth('Lcom/alipay/sdk'), 3)
+
+    def test_get_package_name_array(self):
+        expected_result = [ 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1.0 ]
+        rs = self.ap.get_package_name_array('Lcom/jeremyfeinstein/slidingmen/lib')
+        for i in range(len(expected_result)):
+            self.assertEqual( expected_result[i], rs[i])
 
     def test_get_class_size_sum(self):
         self.assertEqual( self.ap.get_class_size_sum(self.class_item_list), 384 )
@@ -100,6 +110,19 @@ class test_apkparser(unittest.TestCase):
         rs = self.ap.get_sensitive_api_info(self.class_item_list)
         for i in range(len(expected_result)):
             self.assertEqual( expected_result[i], rs[i])
+
+
+class test_feature_extractor(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(test_feature_extractor, self).__init__(*args, **kwargs)
+        self.fea_extractor = feature_extractor( '../samples_balanced/', 'features', '../samples_balanced/samples_id.txt')
+    
+    def test_init(self):
+        self.assertEqual(len(self.fea_extractor.id_list), 10000)
+        
+
+
+
 
 
 if __name__ == '__main__':

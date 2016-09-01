@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 import pickle
 
 androguard_module_path = os.path.join( os.path.dirname(os.path.abspath(__file__)), 'common/Androguard-2.0/androguard' )
@@ -21,11 +22,10 @@ __version__ = '.'.join(str(i) for i in __version_info__)
 
 class apkparser:
 
-    def __init__(self, file_name):
-        self.a = apk.APK(file_name)
+    def __init__(self, file_path):
+        self.a = apk.APK(file_path)
         self.d = dvm.DalvikVMFormat(self.a.get_dex())
         self.x = analysis.VMAnalysis(self.d)
-        
         self.pkg_class_dict = {}
 
     # package level info
@@ -49,24 +49,40 @@ class apkparser:
 
     # package level info
     # return the class count at the package
+    # parameter: string
+    # return: int
     def get_class_count(self, pkg_name):
         if not self.pkg_class_dict: # dict is empty
             self.get_pkg_class_dict()
         if pkg_name in self.pkg_class_dict:
             return len(self.pkg_class_dict[pkg_name])
         else:
-            print('pkg_name is not exists')
-            return -1
+            raise Exception('pkg_name is not exists')
             
 
     # package level info
     # the depth of 'Lcom/jeremyfeinstein/slidingmenu/lib' is 4
+    # parameter: string
+    # return: int
     def get_pkg_depth(self, pkg_name):
         return len(pkg_name.split('/'))
 
-    
+
+    # package level info
+    # numpy.array[10] for package name string hash
+    # parameter: string
+    # return: np.array[10]
+    def get_package_name_array(self, pkg_name):
+        h = FeatureHasher(n_features=10, non_negative=True)
+        D = [{pkg_name:1}]
+        f = h.transform(D)
+        return f.toarray()[0]
+
+
     # class level info
-    # get all class size sum 
+    # get all class size sum
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int 
     def get_class_size_sum(self, class_item_list):
         size_sum = 0
         for class_item in class_item_list:
@@ -86,6 +102,8 @@ class apkparser:
     
 
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_interface_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
@@ -94,21 +112,29 @@ class apkparser:
 
 
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_methods_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum += class_item.get_class_data().get_direct_methods_size()
+            if class_item is not None and class_item.get_class_data() is not None:
+                count_sum += class_item.get_class_data().get_direct_methods_size()
         return count_sum
 
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_virtual_method_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum += class_item.get_class_data().get_virtual_methods_size()
+            if class_item is not None and class_item.get_class_data() is not None:
+                count_sum += class_item.get_class_data().get_virtual_methods_size()
         return count_sum
 
 
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_variable_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
@@ -117,22 +143,30 @@ class apkparser:
 
 
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_instance_variable_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum += class_item.get_class_data().get_instance_fields_size()
+            if class_item is not None and class_item.get_class_data() is not None:
+                count_sum += class_item.get_class_data().get_instance_fields_size()
         return count_sum
 
         
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_static_variable_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
-            count_sum += class_item.get_class_data().get_static_fields_size()
+            if class_item is not None and class_item.get_class_data() is not None:
+                count_sum += class_item.get_class_data().get_static_fields_size()
         return count_sum
 
 
     # class level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_class_access_flag_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
@@ -141,7 +175,8 @@ class apkparser:
 
 
     # class level info
-    # return array[10], float type
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: np.array[10], float type
     def get_class_name_array(self, class_item_list):
         D=[{}]
         for class_item in class_item_list:
@@ -153,7 +188,8 @@ class apkparser:
 
    
     # class level info
-    # return array[10], float type
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: np.array[10], float type
     def get_class_super_class_name_array(self, class_item_list):
         D=[{}]
         for class_item in class_item_list:
@@ -165,6 +201,8 @@ class apkparser:
     
 
     # method level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: int
     def get_method_native_function_count_sum(self, class_item_list):
         count_sum = 0
         for class_item in class_item_list:
@@ -176,10 +214,11 @@ class apkparser:
         return count_sum
 
     # method level info
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: np.array[10], int type
     # return [34, 32, 8, 0, 2, 0, 0, 0, 0, 0], means they are 34 functions with void parameter, and 32 functions with 1 parameter, and 8 functions with 2 parameters, ...
     def get_method_para_num_array(self, class_item_list):
         result = [0]*10
-
         for class_item in class_item_list:
             methods = class_item.get_methods()
             for m in methods:
@@ -192,11 +231,12 @@ class apkparser:
                         result[param_count] += 1
                 else:
                     result[0] += 1
-        return result
+        return np.array(result)
 
 
     # method level info
-    # 
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: np.array[12], int
     def get_method_access_info_array(self, class_item_list):
         '''
         public
@@ -246,6 +286,8 @@ class apkparser:
 
  
     
+    # parameter: class_item_list = self.get_class_item_list(pkg_name)
+    # return: np.array[33], int
     def get_sensitive_api_info(self, class_item_list):
         class_item_names = []
         for class_item in class_item_list:
