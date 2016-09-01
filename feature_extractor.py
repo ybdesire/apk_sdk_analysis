@@ -12,7 +12,28 @@ __version_info__ = (0, 0, 0)
 __version__ = '.'.join(str(i) for i in __version_info__)
 
 
-invalid_ids = ['00005018bcdab5db5b0268095badbe46b97ddc7d']
+invalid_ids = ['00005018bcdab5db5b0268095badbe46b97ddc7d','003541a51286a91e186992df1f2aedab5cac43b8']
+
+def extract_features(feature_extractor, ids, num, cfg=None):
+    count = 0
+    print('started: process-{}'.format(num))
+    for apk_id in tqdm(ids):
+        if apk_id not in invalid_ids:
+            print('ing for: {}'.format(apk_id))
+            ap = apkparser(os.path.join(feature_extractor.src, '{}'.format(apk_id)))
+            pcd = ap.get_pkg_class_dict()
+            for pkg in pcd:
+                fea1 = feature_extractor.get_package_fea(ap, pkg)
+                fea2 = feature_extractor.get_class_fea(ap, pkg)
+                fea3 = feature_extractor.get_method_fea(ap, pkg)
+            count += 1
+            print('process-{}, {}/{}'.format(num, count, len(ids)+1))
+             
+            #print('{}'.format(apk_id))
+            #print('{}\n'.format(pkg))
+            #print('{}'.format(np.hstack( (fea1,fea2,fea3) )))
+            #print('\n\n')
+            
 
 class feature_extractor:
     
@@ -58,30 +79,10 @@ class feature_extractor:
         id_list_len = len(self.id_list)
         for i in range(jobs):
             ids = self.id_list[ int(id_list_len*i/8):int(id_list_len*(i+1)/8) ]
-            P.apply_async(self.extract_features, ids)
+            P.apply_async(extract_features, (self, ids, i))
         P.close()
         P.join()
         
-    def extract_features(self, ids, cfg=None):
-        count = 0
-        for apk_id in tqdm(ids):
-            if apk_id not in invalid_ids:
-                print('ing for: {}'.format(apk_id))
-                ap = apkparser(os.path.join(self.src, '{}'.format(apk_id)))
-                pcd = ap.get_pkg_class_dict()
-                for pkg in pcd:
-                    fea1 = self.get_package_fea(ap, pkg)
-                    fea2 = self.get_class_fea(ap, pkg)
-                    fea3 = self.get_method_fea(ap, pkg)
-                count += 1
-                print('{}, {}/{}'.format(multiprocessing.current_process(), count, len(ids)+1))
-                
-                #print('{}'.format(apk_id))
-                #print('{}\n'.format(pkg))
-                #print('{}'.format(np.hstack( (fea1,fea2,fea3) )))
-                #print('\n\n')
-            
-
 
 
 
