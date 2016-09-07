@@ -3,6 +3,7 @@ from feature_extractor import feature_extractor
 import os
 
 
+# python main.py extract -src ../samples_balanced/  -dst  features1
 def extract_feature(apk_files_path, dst):
     samples_id_file = os.path.join( apk_files_path, 'samples_id.txt' )
     fe = feature_extractor( apk_files_path, dst, samples_id_file )

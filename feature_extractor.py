@@ -5,6 +5,7 @@ import os
 from tqdm import tqdm
 from multiprocessing import Pool
 import multiprocessing
+import datetime
 
 __author__ = 'Bin Yin (ybdesire@gmail.com)'
 __date__ = '2016-09-01'
@@ -22,40 +23,57 @@ def log_start_trace(num, i):
     with open('log1/process_{}.txt'.format(num), 'a') as fw:
         fw.write('{}\n'.format(i))
 
-def log_invalid_id(num, i):
+def log_invalid_id(num, i, str):
     with open('invalid_ids.txt', 'a') as fw:
-        fw.write('{}:{}\n'.format(num, i))
-
+        fw.write('{}:{}\n{}\n'.format(num, i, str))
 
 def extract_features(feature_extractor, ids, num, cfg=None):
     count = 0
-    print('started: process-{}'.format(num))
-    for apk_id in tqdm(ids):
-        if apk_id not in completed_ids:
-            if apk_id not in invalid_ids:
-                try:
-                    log_start_trace(num, apk_id)
-                    print('ing for: {}, process-{}'.format(apk_id, num))
-                    ap = apkparser(os.path.join(feature_extractor.src, '{}'.format(apk_id)))
-                    pcd = ap.get_pkg_class_dict()
-                    for pkg in pcd:
-                        fea1 = feature_extractor.get_package_fea(ap, pkg)
-                        fea2 = feature_extractor.get_class_fea(ap, pkg)
-                        fea3 = feature_extractor.get_method_fea(ap, pkg)
-                    count += 1
-                    print('completed: process-{}, {}/{}'.format(num, count, len(ids)+1))
+    #print('started: process-{}'.format(num))
+    try:
+        for apk_id in tqdm(ids):
+            if apk_id not in completed_ids:
+                if apk_id not in invalid_ids:
+                    try:
+                        feature_apk_path = os.path.join(feature_extractor.dst, apk_id)
+                        if not os.path.isdir(feature_apk_path):
+                            os.mkdir(feature_apk_path)
+                            log_start_trace(num, apk_id)
+                            #print('ing for: {}, process-{}'.format(apk_id, num))
+                            ap = apkparser(os.path.join(feature_extractor.src, '{}'.format(apk_id)))
+                            pcd = ap.get_pkg_class_dict()
+                            #print('{} packages in this apk. process-{}'.format(len(pcd), num))
+                            for pkg in pcd:
+                                feature_apk_pkg_path = os.path.join(feature_apk_path, pkg.replace('/', '.'))
+                                print(feature_apk_pkg_path)
+                                os.mkdir(feature_apk_pkg_path)
+                                fea1 = feature_extractor.get_package_fea(ap, pkg)
+                                fea2 = feature_extractor.get_class_fea(ap, pkg)
+                                fea3 = feature_extractor.get_method_fea(ap, pkg)
+                                jl.dump( np.hstack((fea1,fea2,fea3)), os.path.join(feature_apk_pkg_path, 'fea.jl') )
+                            count += 1
+                            #print('completed: process-{}, {}/{}'.format(num, count, len(ids)+1))
              
-                    #print('{}'.format(apk_id))
-                    #print('{}\n'.format(pkg))
-                    #print('{}'.format(np.hstack( (fea1,fea2,fea3) )))
-                    #print('\n\n')
-                except Exception as e:
-                    log_invalid_id(num, apk_id)
+                        #print('{}'.format(apk_id))
+                        #print('{}\n'.format(pkg))
+                        #print('{}'.format(np.hstack( (fea1,fea2,fea3) )))
+                        #print('\n\n')
+                    except Exception as e:
+                        print('exception: {}'.format(e))
+                        log_invalid_id(num, apk_id, '{}, {}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S'), e))
+ 
+    except KeyboardInterrupt:
+        print('Caught KeyboardInterrupt, terminating process-{}'.format(num))
 
 
 class feature_extractor:
     
     def __init__(self, apk_files_path, dst, samples_id_file):
+
+        assert os.path.isdir(apk_files_path), 'apk files dir not exist at {}'.format(apk_files_path)
+        assert os.path.isfile(samples_id_file), 'sample id file not exist, {}'.format(samples_id_file)
+        if not os.path.isdir(dst):
+            os.mkdir(dst)
         self.src = apk_files_path
         self.dst = dst
         self.id_list = []
@@ -105,6 +123,6 @@ class feature_extractor:
 
 
 if __name__ == '__main__':
-    fe = feature_extractor( '../samples_balanced/', 'features', '../samples_balanced/samples_id.txt' )
+    fe = feature_extractor( '../samples_balanced/', 'features1', '../samples_balanced/samples_id.txt' )
     print('len={}\n'.format(len(fe.id_list)))
     fe.get_features()
