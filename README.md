@@ -9,7 +9,7 @@ Currently APK package features extraction has been completed.
 
 The basic code design philosophy is 3 layers components:
    * low layer: Low level functions to contact with Androguard for single feature extraction.
-   * med layer: Feature extraction control with config parsing. 
+   * med layer: Feature extraction control with config parsing and parallel computation. 
    * first layer: Application layer. Work with user input and result output.
 
 ## code files
@@ -18,7 +18,7 @@ The basic code design philosophy is 3 layers components:
 |--------------------|------------------------------------------------|-----|
 |api_list.p          |sensitive and system API list|  none |
 |apkparser.py        |provide basic functions to get all features   |low|
-|feature_extractor.py|feature extraction process control|med|
+|feature_extractor.py|feature extraction process control multi-processing|med|
 |main.py             |start of the project|first|
 |pattern_parser.py   |parse pattern file and generate api_list.p|none|
 |test.apk            |apk file for unit test|none|
