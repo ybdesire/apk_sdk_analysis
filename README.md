@@ -31,7 +31,7 @@ Run command below to test the basic feature extraction functions at class apkpar
 ```bash
 python test.py
 ```
-Currently xxx test cases have been provided.
+Currently 18 test cases have been provided.
 
 
 # Extracted features
